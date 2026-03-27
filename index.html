@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>E-Commerce Midterm Quiz</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    width: 500px;
+    max-width: 100%;
+    padding: 28px 24px 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+#progress {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.progress-bar-wrap {
+    background: #eee;
+    border-radius: 20px;
+    height: 7px;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 20px;
+    transition: width 0.3s;
+}
+
+#question {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 16px;
+    line-height: 1.5;
+    min-height: 60px;
+    text-align: left;
+}
+
+.option {
+    background: #f0f0f0;
+    padding: 11px 14px;
+    margin: 7px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    transition: background 0.15s, transform 0.1s;
+    border: 2px solid transparent;
+}
+
+.option:hover:not(.correct):not(.wrong) {
+    background: #e0e0ff;
+    border-color: #667eea;
+    transform: translateX(2px);
+}
+
+.correct { background: #4CAF50 !important; color: white; border-color: #388e3c !important; }
+.wrong   { background: #f44336 !important; color: white; border-color: #c62828 !important; }
+
+#score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 14px 0 8px;
+    font-size: 13px;
+    color: #555;
+}
+
+.nav-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+button {
+    padding: 9px 18px;
+    border: none;
+    background: #667eea;
+    color: white;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+button:hover { background: #5567d0; }
+button.secondary { background: #aaa; }
+button.secondary:hover { background: #888; }
+
+.hidden { display: none; }
+
+#result {
+    text-align: center;
+    padding: 10px;
+}
+
+#result h2 { font-size: 26px; margin-bottom: 10px; }
+#result p  { font-size: 16px; color: #555; margin-bottom: 6px; }
+.grade-display {
+    font-size: 52px;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 10px 0;
+}
+
+.mode-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div id="quiz">
+    <div id="progress"></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pbar"></div></div>
+    <h3 id="question"></h3>
+    <div id="options"></div>
+    <div id="score-row">
+        <span id="score">Score: 0</span>
+        <span id="streak"></span>
+    </div>
+    <div class="nav-btns">
+        <button class="secondary" onclick="prev()">&#8592; Prev</button>
+        <button onclick="next()">Next &#8594;</button>
+    </div>
+</div>
+
+<div id="result" class="hidden">
+    <h2>Quiz Complete! 🎉</h2>
+    <div class="grade-display" id="percent-display"></div>
+    <p id="final"></p>
+    <p id="remark"></p>
+    <div class="mode-btns">
+        <button onclick="restart()">Try Again</button>
+        <button class="secondary" onclick="reviewMode()">Review Answers</button>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+const quizData = [
+
+// ── SECTION 1: E-Commerce Fundamentals ────────────────────────────────────
+{q:"People use the Internet to sell products or services to individuals and organizations. Alternatively, individuals use C2B to bid on products or services.",o:["Business-to-business (B2B)","Business-to-business-to-consumer (B2B2C)","Consumer-to-consumer (C2C)","Consumer-to-business (C2B)"],a:3},
+{q:"E-commerce category in which individual consumers sell to or buy from other consumers.",o:["Business-to-business (B2B)","Intrabusiness EC","Consumer-to-consumer (C2C)","Business-to-employees (B2E)"],a:2},
+{q:"Conducting all kinds of business online such as servicing customers, collaborating with business partners, delivering e-learning, and conducting electronic transactions within an organization.",o:["Social Network","Social Business","E-business","E-Commerce"],a:2},
+{q:"The delivery of services, information, or products from organizations to their employees.",o:["Business-to-business (B2B)","Business-to-business-to-consumer (B2B2C)","Consumer-to-consumer (C2C)","Business-to-employees (B2E)"],a:3},
+{q:"A government agency buys or provides goods, services, or information from or to businesses (G2B) or from or to individual citizens (G2C). Governments can deal also with other governments (G2G).",o:["E-government","E-Agency","E-Department","E-Task Force"],a:0},
+{q:"Refers to online activities and communications done by parties working to attain the same goal.",o:["Business model","Social (digital) customers","Collaborative commerce (c-commerce)","Social enterprise"],a:2},
+{q:"E-commerce category that refers to EC transactions among various organizational departments and individuals.",o:["Business-to-business (B2B)","Intrabusiness EC","Business-to-business-to-consumer (B2B2C)","Business-to-employees (B2E)"],a:1},
+{q:"Using the Internet and intranets to purchase, sell, transport, or trade data, goods, or services.",o:["E-Market","E-Government","E-business","E-Commerce"],a:3},
+{q:"All transactions take place between and among organizations.",o:["Business-to-business (B2B)","Intrabusiness EC","Consumer-to-consumer (C2C)","Business-to-employees (B2E)"],a:0},
+{q:"An internal corporate or government network that uses Internet tools, such as Web browsers, and Internet protocols.",o:["Internet","Intranet","Extranet","FTP Server"],a:1},
+
+// ── SECTION 2: Social Commerce & Digital Economy ──────────────────────────
+{q:"Computing systems that involve social interactions and behavior.",o:["Social Computing","End Computing","E-Computing","E-Commerce"],a:0},
+{q:"The execution of any Web 2.0 activity, such as blogging. It also includes all activities conducted in social networks.",o:["Social networking","Social Distancing","Social blogging","Social activity"],a:0},
+{q:"\"An organization that has put in place the strategies, technologies and processes to systematically engage all the individuals of its ecosystem (employees, customers, partners, suppliers) to maximize the co-created value.\" (Social Business Forum 2012).",o:["Social Network","Social Business","E-business","E-Commerce"],a:1},
+{q:"An economy that is based on online transactions, mostly e-commerce. Also called the Internet economy.",o:["Social media","Digital economy","Corporate portal","Digital enterprise"],a:1},
+{q:"Rapidly increasing commercial activities conducted on or facilitated by Facebook.",o:["Social commerce","F-commerce","E-Commerce","Social Network"],a:1},
+{q:"Members of social networks who share opinions about products, services, and vendors, do online social shopping, and understand their rights and how to use the wisdom and power of social communities into their benefit.",o:["Internet user","Network User","E-User","Social (digital) customers"],a:3},
+{q:"The manner in which business is done to generate revenue and create value.",o:["Business model","Social (digital) customers","Collaborative commerce (c-commerce)","Social enterprise"],a:0},
+{q:"These organizations embrace the main goal of focusing on social issues. The enterprises generate revenue. The profits do not go to owners and shareholders, but are put back into the company and used toward building positive social change.",o:["Business model","Social (digital) customers","Collaborative commerce (c-commerce)","Social enterprise"],a:3},
+{q:"A social entity composed of nodes (which are generally individuals, groups, or organizations) that are connected by links such as hobbies, friendship or profession.",o:["Social Network","Social Business","E-business","E-Commerce"],a:0},
+{q:"An economic system constructed around the concept of sharing goods and services among the participating people.",o:["Sharing economy","Shared Memory","Peer to Peer","Relief Goods"],a:0},
+{q:"The e-commerce activities conducted in social networks by using social software.",o:["Social commerce","F-commerce","E-Commerce","Social Network"],a:0},
+{q:"Involves user generated online text, image, audio, and video content that are delivered via Web 2.0 platforms and tools. The media is used primarily for social interactions and conversations such as to share opinions, experiences, insights, and perceptions and to collaborate, all online.",o:["Social media","Social Network","Social Communication","Social Interaction"],a:0},
+
+// ── SECTION 3: Auctions, Marketplaces & Pricing ───────────────────────────
+{q:"An auction in which multiple buyers and their bidding prices are matched with multiple sellers and their asking prices, considering the quantities on both sides.",o:["Single Auction","Double Auction","Triple Auction","Broker Auction"],a:1},
+{q:"Goods that can be transformed to digital format.",o:["Avatar","AI Products","Digital products","Demand Product"],a:2},
+{q:"Where a company purchases from many potential suppliers; this type of purchasing is considered to be many-to-one, and it is a B2B activity.",o:["Buy-side e-marketplace","Business-oriented social network","Crowdsourcing","Disintermediation"],a:0},
+{q:"The search for information within the files and databases of an organization.",o:["Enterprise search","User Search","Dynamic Search","PC Search"],a:0},
+{q:"Software that allows customers to accumulate items they wish to buy before they arrange payment and check out.",o:["Electronic shopping cart","E-Catalog","Electronic Flyer","Electronic Browser"],a:0},
+{q:"An auction conducted online.",o:["E-marketplace","E-mall (online mall)","Electronic auction (e-auction)","E-Shopping"],a:2},
+{q:"Social networking where members converse and connect with one another using any mobile device.",o:["Mobile social networking","Enterprise social networking","Business social networking","Information social networking"],a:0},
+{q:"Prices that are not fixed but that are allowed to fluctuate, and are determined by supply and demand.",o:["Desktop pricing","User Pricing","Dynamic pricing","Web pricing"],a:2},
+{q:"Bartering conducted online, usually in a bartering exchange.",o:["E-bartering (electronic bartering)","Online Buying and Selling","Online Exchange","Web Bartering"],a:0},
+{q:"The search of a user's own computer files. The search is done by looking through all the information that is available on the user's PC.",o:["Desktop search","User Search","Dynamic Search","PC Search"],a:0},
+{q:"An auction where a seller entertains bids from multiple buyers.",o:["Forward auction","Penny auction","Reverse auction","Back Auction"],a:0},
+{q:"Auction in which the buyer places an item for bid (tender) on a request for quote (RFQ) system, potential suppliers bid on the job, with the price reducing sequentially, and the lowest bid wins; primarily a B2B or G2B.",o:["Forward auction","Penny auction","Reverse auction","Back Auction"],a:2},
+
+// ── SECTION 4: Web, Virtual Worlds & Search ───────────────────────────────
+{q:"The Web generation after Web 3.0. It is still an unknown entity. However, it is envisioned as being based on islands of intelligence and as being ubiquitous.",o:["Semantic Web","Web 3.0","Web 4.0","Web 5.0"],a:2},
+{q:"A group of methods that focuses on machines trying to enable machines to understand the semantics of information using natural language understanding tools.",o:["Semantic Web","Web 3.0","Web 4.0","Web 5.0"],a:0},
+{q:"A term used to describe the future of the World Wide Web. It is projected to deliver a new generation of business applications that will see business and social computing converge.",o:["Semantic Web","Web 3.0","Web 4.0","Web 5.0"],a:2},
+{q:"The exchange of goods and services.",o:["Bartering","Bartering exchange","Front End","Back End"],a:0},
+{q:"A community where the interaction takes place over a computer network, mainly the Internet.",o:["Virtual community","Virtual world","Virtual nation","Virtual country"],a:0},
+{q:"A computer program that can access databases of Internet resources, search for specific information or keywords, and report the results.",o:["Desktop search","User Search","Dynamic Search","Search engine"],a:3},
+{q:"An entity that basically aggregates product information from many manufacturers, sometimes thousands of them, in the e-distributor's catalog.",o:["E-bartering (electronic bartering)","E-distributor","Online Exchange","Web Bartering"],a:1},
+{q:"A marketplace where an intermediary arranges barter transactions.",o:["Bartering","Bartering exchange","Front End","Back End"],a:1},
+{q:"Utilizing crowds to collectively execute tasks such as solving problems, innovating, or getting large projects done by dividing the work among many people.",o:["Buy-side e-marketplace","Business-oriented social network","Crowdsourcing","Disintermediation"],a:2},
+{q:"A new type of forward auction in which participants must pay a small non-refundable fee each time they place a bid (usually in small increments above the previous bid). When time expires, the last participant to have placed a bid wins the item and also pays the final bid price.",o:["Forward auction","Penny auction","Reverse auction","Back Auction"],a:1},
+{q:"A site for online communities in a computer-generated setting where users socialize and work with one another through the use of avatars. The creation of objects, jobs, homes, and businesses in the 3D environment is the foundation of these worlds and is fun and satisfying.",o:["Virtual community","Virtual world","Virtual nation","Virtual country"],a:1},
+{q:"Interactive, animated, computerized characters designed to look like humans and are programmed to exhibit people's behavior.",o:["Augmented reality","Avatar","Animation","Cartooning"],a:1},
+{q:"A 3-D computer-based simulated environment built and owned by its residents. In addition to creating buildings, people can create and share cars, clothes, etc.",o:["Virtual reality","Virtualization","Virtual World","Digitization"],a:2},
+{q:"A single point of access, through a Web browser, to critical business information located inside and outside organizations.",o:["Mobile portal","Voice portal","Student Portal","Web Portal"],a:3},
+
+// ── SECTION 5: Retail Models & E-Commerce Channels ───────────────────────
+{q:"Describes the practice of receiving recommendations from buyers (e.g., in social networks or blogs).",o:["Private shopping club","Referral economy","Virtual (pure-play) e-tailers","Discount Club"],a:1},
+{q:"Describes marketing that takes place without physical stores. Selling takes place directly from manufacturer to customer.",o:["Direct marketing","Indirect marketing","Dual marketing","Multi marketing"],a:0},
+{q:"A description of how an organization intends to generate revenue through its business operations.",o:["Business system","Business framework","Business pattern","Business model"],a:3},
+{q:"Enables members to shop at discount, frequently for short periods of time (just few days).",o:["Private shopping club","Referral economy","Virtual (pure-play) e-tailers","Discount Club"],a:0},
+{q:"A grocery that takes orders online and provides deliveries on a daily or other regular schedule or within a very short period of time, sometimes within an hour.",o:["E-grocery","E-Cart","E-grocer","E-tailer"],a:0},
+{q:"The model or strategy of selling both online and offline.",o:["Multichannel Business system","Multichannel Business framework","Multichannel Business pattern","Multichannel Business models"],a:3},
+{q:"A retailer that conducts business exclusively in the physical world.",o:["Click-and-mortar retailer","Direct marketing retailer","Brick-and-mortar retailer","Point-and-mortar retailer"],a:2},
+{q:"An express delivery option.",o:["On-demand delivery report","On-demand delivery move","On-demand delivery service","On-demand delivery grab"],a:2},
+{q:"The removal of an intermediary that is responsible for certain activities (usually in a supply chain) between trading partners.",o:["Intermediation","Disintermediation","Mediation","Forward Mediation"],a:1},
+{q:"Sellers who conduct retail business online.",o:["E-grocer","E-Cart","E-grocery","E-tailers"],a:3},
+{q:"A wireless-based technology used by vendors to send advertisements relevant to the location where customers are at a given time by using GPS.",o:["X-commerce","E-commerce","M-commerce","L-commerce"],a:3},
+{q:"An emerging social media technology that enables several TV viewers who are in different locations to interactively share experiences such as discussions, reviews, and recommendations while watching the same show simultaneously.",o:["Social TV","Avatar TV","Virtual TV","Augmented TV"],a:0},
+{q:"The new intermediation that provides valuable help services.",o:["Intermediation","Disintermediation","Reintermediation","Forward Mediation"],a:2},
+{q:"Companies with direct online sales that do not need physical stores.",o:["Social e-tailers","Avatar e-tailers","Virtual e-tailers","Augmented e-tailers"],a:2},
+{q:"Retailing conducted over the Internet.",o:["E-payment","E-Load","E-banking","E-tailing"],a:3},
+{q:"The delivery of TV content via the Internet by video streaming technologies.",o:["Social TV","Avatar TV","Virtual TV","Internet TV"],a:3},
+{q:"A combination of both the traditional retailer and an online store.",o:["Click-and-mortar retailer","Direct marketing retailer","Brick-and-mortar retailer","Point-and-mortar retailer"],a:0},
+{q:"A single company's (or individual seller's) website where products or services are sold.",o:["Web store","Web portal","Web Service","Web Shop"],a:0},
+{q:"A third party that operates between sellers and buyers.",o:["Intermediary","Business-oriented social network","Crowdsourcing","Disintermediation"],a:0},
+{q:"A social network whose primary objective is to facilitate business.",o:["Buy-side e-marketplace","Business-oriented social network","Crowdsourcing","Disintermediation"],a:1},
+{q:"A third-party entity that brokers the transactions between the buyer and seller.",o:["Online intermediary","Offline intermediary","Inline intermediary","Sideline intermediary"],a:0},
+
+// ── SECTION 6: Group Buying, Deals & Online Shopping Formats ─────────────
+{q:"In many cases, a group of friends can collaborate on gifts for events such as a wedding.",o:["Flash Deals (Deals of the Day)","Online Group Buying","Online private shopping club","Group Gifting Online"],a:3},
+{q:"These are sales in which companies offer heavily discounted products to consumers for a limited time.",o:["Flash Deals (Deals of the Day)","Online Group Buying","Online private shopping club","Group Gifting Online"],a:0},
+{q:"In these depressed economic times, more people are using the Internet as a smart way to save money.",o:["Flash Deals (Deals of the Day)","Online Group Buying","Online private shopping club","Group Gifting Online"],a:1},
+{q:"In _______________, a consumer can find a product, order and pay for it, and arrange for shipment.",o:["Online malls without shared services","Online malls with shared services","Referring Directories","Referring without Directories"],a:1},
+{q:"Enables members to shop at a discount, frequently for short periods of time (just few hours or days).",o:["Flash Deals (Deals of the Day)","Online Group Buying","Online private shopping club","Group Gifting Online"],a:2},
+
+// ── SECTION 7: B2B, Procurement & E-Marketplaces ─────────────────────────
+{q:"A buying situation that occurs when a buyer makes unplanned purchases of items needed quickly, resulting in buying at non-pre-negotiated, and usually higher, prices.",o:["Panic buying","Total buying","Over buying","Maverick buying"],a:3},
+{q:"Orders from several buyers are aggregated so that better prices due to larger quantities purchased can be negotiated.",o:["Group Purchasing","Collaborative Purchasing","Mobile Purchasing","Corporate Purchasing"],a:0},
+{q:"Items, such as office supplies or light bulbs, which support operation and production.",o:["Dynamic Materials","Direct materials","Fixed materials","Indirect materials"],a:3},
+{q:"The online purchase of supplies, materials, energy, work, and services. It can be done via the Internet or via a private network such as EDI.",o:["E-procurement","E-distributor","E-shopping","E-purchasing"],a:0},
+{q:"The strategy of providing comprehensive, quality e-services for business partners.",o:["Business relationship management","Strategy relationship management","Partner relationship management","Quality relationship management"],a:2},
+{q:"The process of planning, organizing, and coordinating of all the activities pertaining to the purchasing of the goods and services needed by an organization.",o:["Quality management","Procurement management","Sales management","Partner management"],a:1},
+{q:"A company submits its surplus to the exchange and receives points of credit, which the company can then use to buy items that it needs.",o:["Bartering exchange","Buy-side exchange","B2B exchange","B2G exchange"],a:0},
+{q:"An e-marketplace owned by large buyers that invite sellers to browse and offers to fulfill orders.",o:["Virtual e-marketplace","Portal e-marketplace","Avatar e-marketplace","Buy-side e-marketplace"],a:3},
+{q:"Many-to-many e-marketplaces where many buyers and many sellers meet electronically to trade with one another.",o:["Trading","Exchanges","Consortium","Procurement"],a:1},
+{q:"Purchasing done by employees without the approval of supervisors and without the involvement of a procurement department.",o:["Laptop purchasing","Mobile purchasing","Sales purchasing","Desktop purchasing"],a:3},
+{q:"The auction process in which many sellers (suppliers) compete to fulfill orders requested by one buyer.",o:["E-auction","Open auction","Reverse auction","Online auction"],a:2},
+{q:"One-to-many and many-to-one markets where one company does either all the selling or all the buying.",o:["Company-centric EC","Collaborative EC","Consortium trading exchange EC","Corporate-Centric EC"],a:0},
+{q:"Materials used in making products, such as steel in a car or paper in a book.",o:["Dynamic Materials","Direct materials","Fixed materials","Indirect materials"],a:1},
+{q:"Markets in which trading is in a service or a product used in many industries.",o:["Vertical marketplaces","Horizontal marketplaces","Direct marketplaces","Indirect marketplace"],a:1},
+{q:"Markets for one industry.",o:["Vertical marketplaces","Horizontal marketplaces","Direct marketplaces","Indirect marketplace"],a:0},
+
+// ── SECTION 8: Portals, B2B Marketing & Exchanges ────────────────────────
+{q:"Portals that enable and facilitate collaboration.",o:["Group Portals","Collaborative Portals","Mobile Portals","Corporate Portals"],a:1},
+{q:"Virtual games designed to support B2B training and decision making.",o:["Virtual Gaming","Game Development","Game Play","Gamification"],a:3},
+{q:"Marketing and sales made by manufacturers and wholesalers along the sell side of the supply chain.",o:["B2C marketing","B2G marketing","B2B marketing","B2E marketing"],a:2},
+{q:"The rapid movement of prices over time and possibly across customers.",o:["Dynamic pricing","Direct materials","Fixed materials","Indirect materials"],a:0},
+{q:"A gateway to a corporate website and other information sources that enables communication, collaboration, and access to company information.",o:["Group Portals","Collaborative Portals","Mobile Portals","Corporate Portals"],a:3},
+{q:"Third-party exchanges open to all interested parties (sellers and buyers).",o:["Public e-marketplaces","Private e-marketplaces","3rd party e-marketplaces","Open e-marketplaces"],a:0},
+{q:"Portals accessible via mobile devices, especially cell phones, smartphones, tablets, and other handheld devices.",o:["Group Portals","Collaborative Portals","Mobile Portals","Corporate Portals"],a:2},
+{q:"The model in which a business sells products and services to business customers electronically, frequently over an extranet.",o:["Side to side e-marketplace","Back to back e-marketplace","Back-side e-marketplace","Sell-side e-marketplace"],a:3},
+{q:"An exchange formed and operated by a group of major companies in one industry. They can be suppliers, buyers, or both.",o:["Company-centric EC","Collaborative EC","Consortium trading exchange CTE","Corporate-Centric EC"],a:2},
+{q:"Online product exhibitions.",o:["Horizontal trade show","Direct trade show","Indirect trade show","Virtual trade show"],a:3},
+{q:"Information portals for businesses.",o:["B2C portals","B2G portals","B2B portals","B2E portals"],a:2},
+{q:"Exchange formed by industry companies.",o:["Company-centric EC","Collaborative EC","Consortium trading exchange","Corporate-Centric EC"],a:2},
+{q:"Group decision influences must be considered.",o:["Interpersonal influences","Extrapersonal influence","Social influence","Spiritual influence"],a:2}
+
+];
+
+let current = 0, score = 0;
+let answered = new Array(quizData.length).fill(null); // null=unanswered, true=correct, false=wrong
+
+function load() {
+    let q = quizData[current];
+    document.getElementById("question").innerText = `Q${current+1}. ${q.q}`;
+    document.getElementById("progress").innerText = `Question ${current+1} of ${quizData.length}`;
+    document.getElementById("score").innerText = `Score: ${score}`;
+    document.getElementById("pbar").style.width = `${Math.round((current+1)/quizData.length*100)}%`;
+
+    let html = "";
+    q.o.forEach((opt, i) => {
+        let cls = "";
+        if (answered[current] !== null) {
+            if (i === q.a) cls = "correct";
+            else if (i === answered[current] && answered[current] !== q.a) cls = "wrong";
+        }
+        html += `<div class="option ${cls}" onclick="select(${i})">${opt}</div>`;
+    });
+    document.getElementById("options").innerHTML = html;
+
+    const correctCount = answered.filter(v => v !== null && quizData[answered.indexOf(v)]);
+    document.getElementById("streak").innerText = `Answered: ${answered.filter(v => v !== null).length}/${quizData.length}`;
+}
+
+function select(i) {
+    if (answered[current] !== null) return;
+    answered[current] = i;
+
+    let correct = quizData[current].a;
+    let opts = document.querySelectorAll(".option");
+    opts.forEach((el, idx) => {
+        if (idx === correct) el.classList.add("correct");
+        if (idx === i && i !== correct) el.classList.add("wrong");
+    });
+
+    if (i === correct) score++;
+    document.getElementById("score").innerText = `Score: ${score}`;
+
+    if (answered.every(v => v !== null)) {
+        setTimeout(showResult, 600);
+    }
+}
+
+function next() {
+    if (current === quizData.length - 1) return showResult();
+    current++;
+    load();
+}
+
+function prev() {
+    if (current === 0) return;
+    current--;
+    load();
+}
+
+function showResult() {
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+    let pct = Math.round(score / quizData.length * 100);
+    document.getElementById("percent-display").innerText = pct + "%";
+    document.getElementById("final").innerText = `${score} out of ${quizData.length} correct`;
+    let remark = pct >= 90 ? "Outstanding! 🌟" : pct >= 75 ? "Great job! 👍" : pct >= 60 ? "Keep practicing! 📚" : "Study more and try again! 💪";
+    document.getElementById("remark").innerText = remark;
+}
+
+function restart() {
+    current = 0; score = 0;
+    answered = new Array(quizData.length).fill(null);
+    document.getElementById("quiz").classList.remove("hidden");
+    document.getElementById("result").classList.add("hidden");
+    load();
+}
+
+function reviewMode() {
+    current = 0;
+    document.getElementById("quiz").classList.remove("hidden");
+    document.getElementById("result").classList.add("hidden");
+    // Mark all unanswered as revealed
+    answered = answered.map((v, i) => v === null ? -1 : v);
+    load();
+}
+
+load();
+</script>
+
+</body>
+</html>
